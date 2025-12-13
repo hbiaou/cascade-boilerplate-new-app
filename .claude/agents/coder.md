@@ -11,12 +11,19 @@ This is a FRESH context window - you have no memory of previous sessions.
 
 ## INPUT FILES
 
-**Required:**
+**Required (always):**
+
 - `app_spec.txt` - The complete technical specification. Contains all requirements for the application.
 - `feature_list.json` - The list of all features/tests to implement. Contains test descriptions, steps, and pass/fail status.
 - `init.sh` - Script to start the development environment (servers, dependencies).
 
-**Optional:**
+**Optional (improvement mode):**
+
+- `improvement_spec.txt` - If this file exists, you are in IMPROVEMENT MODE. Read this file to understand new features being added.
+- `improvement_list.json` - If this file exists, PRIORITIZE implementing these improvements over `feature_list.json`.
+
+**Optional (general):**
+
 - `grist_schema.txt` - If this file exists, read it to understand the Grist database schema and API integration requirements.
 - `claude-progress.txt` - Progress notes from previous coding sessions. Helps understand what was accomplished previously.
 
@@ -35,20 +42,29 @@ The Coder agent generates many code files based on the tech stack specified in `
 
 **Note:** The Coder agent creates application code files throughout the project directory structure. These files are part of the application being built, not Cascade scaffolding files.
 
-### STEP 0: VERIFY PREREQUISITES (MANDATORY)
+### STEP 0: VERIFY PREREQUISITES AND DETECT MODE (MANDATORY)
 
-Before starting work, verify that all required files exist:
+Before starting work, verify that all required files exist and detect which mode to operate in:
 
 ```bash
 # Check for required files
 ls -la app_spec.txt feature_list.json init.sh
+
+# Check for improvement mode files
+ls -la improvement_spec.txt improvement_list.json
 ```
 
-**If ANY of these files are missing:**
+**Mode Detection:**
+
+- If `improvement_list.json` EXISTS → You are in **IMPROVEMENT MODE**
+- If ONLY `feature_list.json` EXISTS → You are in **STANDARD MODE**
+
+**If ANY required files are missing:**
 
 - `app_spec.txt` missing → Run the architect agent first
 - `feature_list.json` missing → Run the project-initializer agent first
 - `init.sh` missing → Run the project-initializer agent first
+- `improvement_spec.txt` exists but `improvement_list.json` missing → Run project-initializer in improvement mode
 
 **STOP immediately and inform the user which agent needs to run first.**
 Do not proceed without these foundation files.
@@ -76,12 +92,23 @@ cat claude-progress.txt
 # 6. Check recent git history
 git log --oneline -20
 
-# 7. Count remaining tests
+# 7. Count remaining tests in feature_list.json
 cat feature_list.json | grep '"passes": false' | wc -l
+
+# 8. IF IN IMPROVEMENT MODE - Read improvement files
+if [ -f improvement_spec.txt ]; then
+  cat improvement_spec.txt
+  cat improvement_list.json
+  echo "Remaining improvement tests:"
+  cat improvement_list.json | grep '"passes": false' | wc -l
+fi
 ```
 
-Understanding the `app_spec.txt` is critical - it contains the full requirements
-for the application you're building.
+**Understanding Context:**
+
+- `app_spec.txt` is critical - it contains the full requirements for the original application
+- If `improvement_spec.txt` exists, read it to understand what NEW features are being added
+- If `improvement_list.json` exists, these tests take PRIORITY over `feature_list.json`
 
 ### STEP 2: START SERVERS (IF NOT RUNNING)
 
@@ -120,7 +147,22 @@ For example, if this were a chat app, you should perform a test that logs into t
 
 ### STEP 4: CHOOSE ONE FEATURE TO IMPLEMENT
 
-Look at feature_list.json and find the highest-priority feature with "passes": false.
+**IMPROVEMENT MODE:**
+
+If `improvement_list.json` exists and has tests with `"passes": false`:
+
+1. **PRIORITIZE `improvement_list.json`** - Work on improvements FIRST
+2. Find the highest-priority improvement with `"passes": false`
+3. Focus on completing one improvement perfectly before moving to the next
+
+**STANDARD MODE:**
+
+If NO `improvement_list.json` exists OR all improvements are passing:
+
+1. Look at `feature_list.json` and find the highest-priority feature with `"passes": false`
+2. Focus on completing one feature perfectly
+
+**In both modes:**
 
 Focus on completing one feature perfectly and completing its testing steps in this session before moving on to other features.
 It's ok if you only complete one feature in this session, as there will be more sessions later that continue to make progress.
@@ -184,6 +226,60 @@ to:
 - Reorder tests
 
 **ONLY CHANGE "passes" FIELD AFTER VERIFICATION WITH SCREENSHOTS.**
+
+### STEP 7.5: MERGE IMPROVEMENTS (IMPROVEMENT MODE ONLY)
+
+**CRITICAL:** This step ONLY applies when in IMPROVEMENT MODE.
+
+After marking an improvement test as passing, check if ALL improvements are complete:
+
+```bash
+# Count remaining improvements
+cat improvement_list.json | grep '"passes": false' | wc -l
+```
+
+**If the count is 0 (all improvements passing):**
+
+1. **Merge `improvement_list.json` into `feature_list.json`:**
+
+   ```bash
+   # Read both files and merge them
+   # The improvement tests should be appended to feature_list.json
+   ```
+
+2. **Delete `improvement_list.json`:**
+
+   ```bash
+   rm improvement_list.json
+   ```
+
+3. **Delete `improvement_spec.txt`:**
+
+   ```bash
+   rm improvement_spec.txt
+   ```
+
+4. **Commit the merge:**
+
+   ```bash
+   git add feature_list.json
+   git rm improvement_list.json improvement_spec.txt
+   git commit -m "Merge completed improvements into feature_list
+
+All improvement tests are now passing and have been integrated into the main feature list.
+- Merged improvement_list.json into feature_list.json
+- Removed improvement_spec.txt and improvement_list.json"
+   ```
+
+**After the merge:**
+
+- You are now back in STANDARD MODE
+- Continue working on any remaining tests in `feature_list.json` (which now includes the former improvements)
+
+**If improvements are NOT all complete yet:**
+
+- Skip this step and continue to STEP 8
+- You will return to this step after the next improvement is completed
 
 ### STEP 8: CREATE RELEASE (MANDATORY AFTER FEATURE COMPLETION)
 

@@ -104,11 +104,20 @@ To use Cascade effectively, you need:
 
 Each agent has specific trigger conditions:
 
+### Standard Workflow (New Projects)
+
 - **`@architect`**: Use when starting a new project. Always run this first to create `app_spec.txt`.
 - **`@grist-database-specialist`**: Use only if `app_spec.txt` specifies Grist as the database backend, or if you explicitly want to use Grist's hosted free-tier API. This agent helps design the schema and implement the integration layer.
 - **`@project-initializer`**: Use after `app_spec.txt` exists (and optionally after Grist setup which creates `grist_schema.txt`). This creates the project foundation and `feature_list.json`.
 - **`@coder`**: Use repeatedly during development. Run this agent to implement features one at a time from `feature_list.json`.
 - **`@release-engineer`**: Called AUTOMATICALLY by the coder agent after each feature completion. Can also be called manually for milestone releases. Requires a clean git working directory and passing tests. Handles SemVer versioning, changelog updates, and git tagging (does not deploy). Designed to be called multiple times during development.
+
+### Improvement Workflow (Adding Features to Existing Apps)
+
+- **`@architect`** (improvement mode): Use when `app_spec.txt` already exists and you want to add new features. Creates `improvement_spec.txt` instead of modifying `app_spec.txt`.
+- **`@project-initializer`** (improvement mode): Use after `improvement_spec.txt` exists. Creates `improvement_list.json` with tests for new features only.
+- **`@coder`** (improvement mode): Automatically detects `improvement_list.json` and prioritizes improvements over original features. Merges improvement files after all improvements pass.
+- **`@release-engineer`**: Works identically in both workflows. Called automatically after each improvement completion.
 
 ## Usage Guide
 
@@ -170,6 +179,206 @@ If you want to create a milestone release (e.g., moving from 0.x.x to 1.0.0, or 
 ```
 
 This is optional - the automatic incremental releases during development are sufficient for most cases.
+
+---
+
+## Iterative Improvement Workflow
+
+After your initial app development is complete, you may want to add new features or make improvements to your deployed application. Cascade supports an **iterative improvement workflow** that allows you to enhance your existing application without disrupting the original feature tracking.
+
+### When to Use Improvement Workflow
+
+Use this workflow when:
+
+- Your app is already deployed/completed and `feature_list.json` exists
+- You want to add **NEW features** not in the original feature list
+- You want to make **enhancements** or **improvements** to existing functionality
+- You want to **refactor** or **optimize** existing features
+- The user comes back with additional requirements after the initial build
+
+### Workflow Sequence
+
+The improvement workflow follows a similar but specialized path:
+
+1. **@architect** (improvement mode) → `improvement_spec.txt`
+2. **@project-initializer** (improvement mode) → `improvement_list.json`
+3. **@coder** (improvement mode) → implements/verifies improvements
+4. **@release-engineer** → versioning (automatic, no change)
+
+### How It Works
+
+#### Step 1: Define Improvements
+
+Start by engaging the architect in improvement mode:
+
+```bash
+@architect I want to add [describe new features/improvements]
+```
+
+**The architect will:**
+
+- **Detect improvement mode** by checking if `app_spec.txt` already exists
+- Read your existing `app_spec.txt` to understand current architecture
+- Analyze your improvement request
+- Ask clarifying questions about the new features
+- Create `improvement_spec.txt` with the improvement requirements
+
+**Key difference from initial workflow:**
+
+- `app_spec.txt` remains **unchanged** (it's the original specification)
+- `improvement_spec.txt` is created **separately** to track the new additions
+- The improvement spec focuses on **what's changing** rather than re-describing the entire app
+
+#### Step 2: Create Improvement Tests
+
+After the improvement specification is ready, initialize the testing framework:
+
+```bash
+@project-initializer Set up tests for the improvements
+```
+
+**The project-initializer will:**
+
+- **Detect improvement mode** by finding `improvement_spec.txt`
+- Read `improvement_spec.txt` for new feature requirements
+- Read `app_spec.txt` for existing app context
+- Review existing `feature_list.json` to avoid duplicate tests
+- Generate `improvement_list.json` with **5-25 test cases** (fewer than initial because it's incremental)
+
+**Key difference from initial workflow:**
+
+- Only creates `improvement_list.json` (no `init.sh`, `.gitignore`, or git repo setup)
+- Tests focus on **new/changed functionality** only
+- Includes **regression tests** to verify existing features still work
+- **Does NOT modify** `feature_list.json` at this stage
+
+#### Step 3: Implement Improvements
+
+Now engage the coder to build the improvements:
+
+```bash
+@coder Work on the improvements
+```
+
+**The coder will:**
+
+- **Detect improvement mode** by finding `improvement_list.json`
+- **Prioritize improvements** - work on `improvement_list.json` FIRST before touching `feature_list.json`
+- Implement each improvement one by one
+- Test with browser automation
+- Mark improvements as passing in `improvement_list.json`
+- **Automatically call release-engineer** after each completed improvement (same as standard workflow)
+
+**Automatic Merge When Complete:**
+
+Once ALL improvements are passing (all tests in `improvement_list.json` have `"passes": true`), the coder will **automatically**:
+
+1. Merge `improvement_list.json` into `feature_list.json`
+2. Delete `improvement_list.json`
+3. Delete `improvement_spec.txt`
+4. Commit the merge with a descriptive message
+
+After the merge, the coder returns to **standard mode** and can continue with any remaining features in the now-unified `feature_list.json`.
+
+#### Step 4: Release Management (Automatic)
+
+The **@release-engineer** agent works identically for both workflows:
+
+- Called automatically by the coder after each improvement is completed
+- Creates incremental version tags (typically MINOR bumps for new features, PATCH for enhancements)
+- Updates changelog with improvement descriptions
+- No changes needed to the agent itself
+
+### File Structure During Improvements
+
+**Before Improvement Workflow:**
+
+```text
+your-app/
+├── app_spec.txt              # Original specification
+├── feature_list.json         # Original features (some or all passing)
+├── init.sh                   # Environment setup
+└── [app code files...]
+```
+
+**During Improvement Workflow:**
+
+```text
+your-app/
+├── app_spec.txt              # Original specification (unchanged)
+├── improvement_spec.txt      # New improvements specification
+├── feature_list.json         # Original features (unchanged during improvements)
+├── improvement_list.json     # New improvement tests (separate)
+├── init.sh                   # Environment setup
+└── [app code files...]
+```
+
+**After Improvements Complete:**
+
+```text
+your-app/
+├── app_spec.txt              # Original specification
+├── feature_list.json         # Merged: original + improvements
+├── init.sh                   # Environment setup
+└── [app code files...]
+```
+
+Note: `improvement_spec.txt` and `improvement_list.json` are automatically deleted after the merge.
+
+### Example Improvement Scenario
+
+**Scenario:** You've built a task management app and now want to add collaboration features.
+
+```bash
+# Step 1: Define the improvement
+@architect I want to add task sharing and real-time collaboration features
+
+# The architect creates improvement_spec.txt with:
+# - Task sharing functionality
+# - Real-time updates via WebSocket
+# - Activity feed
+# - Dependencies on existing features
+
+# Step 2: Set up improvement tests
+@project-initializer Set up tests for the collaboration features
+
+# The project-initializer creates improvement_list.json with 15 tests:
+# - 10 functional tests for new features
+# - 3 integration tests for how improvements work with existing features
+# - 2 regression tests to ensure existing task creation still works
+
+# Step 3: Build the improvements
+@coder Work on the collaboration features
+
+# The coder:
+# - Implements task sharing API and UI
+# - Adds WebSocket server for real-time sync
+# - Builds activity feed component
+# - Tests each feature with browser automation
+# - Creates releases: v1.3.0, v1.4.0, v1.5.0 (MINOR bumps for new features)
+# - After all 15 tests pass, automatically merges improvement_list.json into feature_list.json
+```
+
+### Multiple Improvement Cycles
+
+You can run the improvement workflow **multiple times** on the same project:
+
+1. Complete first set of improvements → Files merge
+2. User requests more improvements → Create new `improvement_spec.txt`
+3. Run improvement workflow again → New `improvement_list.json` created
+4. Complete second set → Files merge again
+
+Each cycle is independent and follows the same pattern.
+
+### Benefits of Separate Improvement Tracking
+
+1. **Clear Separation:** Original features vs. new improvements remain distinct during development
+2. **Easier Rollback:** If improvements don't work out, you can abandon them without affecting the original feature list
+3. **Focused Testing:** Improvement tests specifically target new functionality and integration points
+4. **Single Source of Truth:** After merge, `feature_list.json` contains the complete history of all features
+5. **Flexible Re-entry:** Start improvements at any time without disrupting existing work
+
+---
 
 ## Contributing
 
