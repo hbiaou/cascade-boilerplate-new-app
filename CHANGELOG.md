@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2025-12-13
+
+### Added
+
+- Iterative improvement workflow for existing applications
+  - Architect agent MODE 2 for creating improvement specifications
+  - Project initializer agent MODE 2 for managing improvement tracking
+  - Coder agent automatic improvement detection and prioritization
+  - Automatic merge of verified improvements into feature_list.json
+  - Support for multiple improvement cycles on existing applications
+
+### Enhanced
+
+- Architect agent: Added improvement specification mode
+- Project initializer agent: Added improvement list management
+- Coder agent: Implemented improvement workflow orchestration with automatic mode detection
+- AI workflow documentation: Comprehensive improvement workflow guide
+
+### Fixed
+
+- Mode detection consistency in coder agent bash scripts (improvement_list.json check)
+
 ## [0.1.0] - 2025-12-12
 
 ### Added

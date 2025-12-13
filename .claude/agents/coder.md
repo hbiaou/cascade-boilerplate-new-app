@@ -65,6 +65,7 @@ ls -la improvement_spec.txt improvement_list.json
 - `feature_list.json` missing → Run the project-initializer agent first
 - `init.sh` missing → Run the project-initializer agent first
 - `improvement_spec.txt` exists but `improvement_list.json` missing → Run project-initializer in improvement mode
+- `improvement_list.json` exists but `improvement_spec.txt` missing → Proceed with caution (improvement_spec.txt is optional for coder); if clarification needed, run architect in improvement mode
 
 **STOP immediately and inform the user which agent needs to run first.**
 Do not proceed without these foundation files.
@@ -96,8 +97,13 @@ git log --oneline -20
 cat feature_list.json | grep '"passes": false' | wc -l
 
 # 8. IF IN IMPROVEMENT MODE - Read improvement files
-if [ -f improvement_spec.txt ]; then
-  cat improvement_spec.txt
+if [ -f improvement_list.json ]; then
+  if [ -f improvement_spec.txt ]; then
+    cat improvement_spec.txt
+  else
+    echo "WARNING: improvement_list.json exists but improvement_spec.txt is missing!"
+    echo "Run architect agent in improvement mode to generate improvement_spec.txt"
+  fi
   cat improvement_list.json
   echo "Remaining improvement tests:"
   cat improvement_list.json | grep '"passes": false' | wc -l
@@ -201,9 +207,14 @@ Use browser automation tools:
 - Skip visual verification
 - Mark tests passing without thorough verification
 
-### STEP 7: UPDATE feature_list.json (CAREFULLY!)
+### STEP 7: UPDATE TEST FILE (CAREFULLY!)
 
 **YOU CAN ONLY MODIFY ONE FIELD: "passes"**
+
+**Determine which file to update based on current mode:**
+
+- **STANDARD MODE:** Update `feature_list.json`
+- **IMPROVEMENT MODE:** Update `improvement_list.json`
 
 After thorough verification, change:
 
@@ -242,28 +253,34 @@ cat improvement_list.json | grep '"passes": false' | wc -l
 
 1. **Merge `improvement_list.json` into `feature_list.json`:**
 
-   ```bash
-   # Read both files and merge them
-   # The improvement tests should be appended to feature_list.json
+   Use the Read and Write tools to:
+   - Read `improvement_list.json` and parse the JSON array
+   - Read `feature_list.json` and parse the JSON array
+   - Append all improvement test objects to the feature_list array
+   - Ensure the merged array maintains proper JSON structure and formatting
+   - Write the updated array back to `feature_list.json`
+
+   Example structure (pseudocode):
+
+   ```javascript
+   feature_list = JSON.parse(read('feature_list.json'))
+   improvements = JSON.parse(read('improvement_list.json'))
+   feature_list.push(...improvements)
+   write('feature_list.json', JSON.stringify(feature_list, null, 2))
    ```
 
-2. **Delete `improvement_list.json`:**
+2. **Remove improvement files:**
 
    ```bash
-   rm improvement_list.json
+   git rm improvement_list.json
+   if [ -f improvement_spec.txt ]; then
+     git rm improvement_spec.txt
+   fi
    ```
 
-3. **Delete `improvement_spec.txt`:**
+3. **Commit the merge:**
 
    ```bash
-   rm improvement_spec.txt
-   ```
-
-4. **Commit the merge:**
-
-   ```bash
-   git add feature_list.json
-   git rm improvement_list.json improvement_spec.txt
    git commit -m "Merge completed improvements into feature_list
 
 All improvement tests are now passing and have been integrated into the main feature list.
