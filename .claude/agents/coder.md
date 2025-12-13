@@ -96,7 +96,7 @@ git log --oneline -20
 cat feature_list.json | grep '"passes": false' | wc -l
 
 # 8. IF IN IMPROVEMENT MODE - Read improvement files
-if [ -f improvement_spec.txt ]; then
+if [ -f improvement_list.json ]; then
   cat improvement_spec.txt
   cat improvement_list.json
   echo "Remaining improvement tests:"
