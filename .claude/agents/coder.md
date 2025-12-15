@@ -143,13 +143,112 @@ For example, if this were a chat app, you should perform a test that logs into t
 - Add issues to a list
 - Fix all issues BEFORE moving to new features
 - This includes UI bugs like:
-  * White-on-white text or poor contrast
+  * White-on-white text or poor contrast (check WCAG AA: 4.5:1 text, 3:1 UI)
   * Random characters displayed
-  * Incorrect timestamps
+  * Incorrect timestamps or data formatting
   * Layout issues or overflow
-  * Buttons too close together
-  * Missing hover states
-  * Console errors
+  * Buttons too close together or inconsistent spacing
+  * Missing hover states or incorrect transitions
+  * Console errors or warnings
+  * **DESIGN SYSTEM VIOLATIONS (these are BUGS):**
+    - Wrong font family (verify matches design_system typography)
+    - Incorrect colors (verify CSS variables match design_system hex codes)
+    - Missing or broken animations (verify design_system motion strategy)
+    - Generic styling that doesn't match design_system (Inter font, purple gradients)
+    - Flat backgrounds when design_system specifies gradients/patterns/depth
+    - Hardcoded Tailwind colors (bg-blue-500) instead of CSS variables (bg-primary)
+    - Arbitrary spacing values (p-[17px]) instead of spacing scale (p-4)
+    - Missing component states (hover, focus, active, disabled)
+
+### STEP 3.5: DESIGN SYSTEM VALIDATION (MANDATORY FOR ALL TESTS)
+
+**Before marking ANY test as passing, you MUST validate design system compliance.**
+
+**CRITICAL:** Design system violations are BUGS. Generic "AI slop" aesthetics are unacceptable.
+
+#### MANDATORY DESIGN SYSTEM VALIDATION CHECKLIST
+
+Use this checklist for EVERY test (functional and visual). Check ALL relevant sections:
+
+**1. Typography Validation:**
+- [ ] **Font Family**: Inspect element in DevTools, verify computed font-family matches design_system EXACTLY
+- [ ] **Font Size**: Verify font-size matches design_system typography scale
+- [ ] **Font Weight**: Verify font-weight matches design_system specification
+- [ ] **Line Height**: Verify line-height creates comfortable reading (from design_system)
+- [ ] **Letter Spacing**: Verify tracking/letter-spacing if specified in design_system
+- [ ] **Anti-Slop Check**: Verify NOT using Inter, Roboto, Arial, Space Grotesk, or system fonts
+
+**2. Color System Validation:**
+- [ ] **CSS Variables Defined**: Inspect :root, verify ALL CSS custom properties from design_system are defined
+- [ ] **Hex Values Match**: Verify CSS variable values match hex codes from design_system EXACTLY
+- [ ] **Variable Usage**: Verify components use CSS variables (bg-primary) NOT hardcoded colors (bg-blue-500)
+- [ ] **Contrast Ratios**: Use DevTools to verify WCAG AA (4.5:1 text, 3:1 UI components)
+- [ ] **Anti-Slop Check**: Verify NOT using purple gradients or generic blue-500/purple-500 defaults
+
+**3. Component Styling Validation:**
+- [ ] **Exact Classes**: Verify component uses EXACT Tailwind classes from design_system specification
+- [ ] **Default State**: Take screenshot, verify default appearance matches design_system
+- [ ] **Hover State**: Hover element, verify transition and visual change match design_system
+- [ ] **Active State**: Click element, verify active feedback (e.g., scale-[0.98]) from design_system
+- [ ] **Focus State**: Tab to element, verify focus ring (ring-2 ring-primary ring-offset-2)
+- [ ] **Disabled State**: Verify opacity-50 and cursor-not-allowed if applicable
+- [ ] **Anti-Slop Check**: Verify NOT using raw HTML elements (use styled components)
+
+**4. Animation/Motion Validation:**
+- [ ] **Page Load**: Refresh page, verify page load animations execute as specified
+- [ ] **Stagger Effect**: Verify animation-delay values create stagger (e.g., delay-0, delay-100, delay-200)
+- [ ] **Hover Transitions**: Hover interactive elements, verify duration-200 ease-out
+- [ ] **Timing Functions**: Verify easing functions match design_system (ease-out, ease-in-out)
+
+**5. Background/Depth Validation:**
+- [ ] **Background Treatment**: Verify backgrounds NOT flat solid colors (unless specified)
+- [ ] **Gradients**: Check for gradients, patterns, or blur effects per design_system
+- [ ] **Card Elevation**: Verify cards have appropriate shadows (shadow-sm, shadow-md)
+- [ ] **Anti-Slop Check**: Verify atmosphere and depth per design_system
+
+**6. Spacing/Layout Validation:**
+- [ ] **Spacing Scale**: Inspect margins/padding, verify using spacing scale (p-4, gap-6)
+- [ ] **NO Arbitrary Values**: Verify NO arbitrary spacing (p-[17px], m-[23px])
+- [ ] **Consistent Spacing**: Verify component spacing is consistent throughout
+- [ ] **Responsive**: Resize browser, verify responsive breakpoints work
+
+**7. Accessibility Validation:**
+- [ ] **Contrast Check**: Use DevTools to verify color contrast (4.5:1 text, 3:1 UI minimum)
+- [ ] **Focus Indicators**: Tab through interface, verify focus rings visible on ALL interactive elements
+- [ ] **Focus Styling**: Verify focus-visible:ring-2 ring-ring ring-offset-2 applied
+- [ ] **Semantic HTML**: Verify proper heading hierarchy, aria-labels on icon buttons
+- [ ] **Keyboard Navigation**: Verify full keyboard support (tab order makes sense)
+
+#### HOW TO USE THIS CHECKLIST
+
+**For Visual/Style Tests**: Use FULL checklist - validate ALL 7 sections
+
+**For Functional Tests**: Use relevant sections:
+- If test involves UI components → validate sections 1-3, 6, 7
+- If test involves page navigation → validate sections 1, 4, 5, 7
+- If test involves forms → validate sections 1-3, 7
+
+**PROCESS**:
+1. Open `app_spec.txt` and locate the `<design_system>` section
+2. For each checklist item, compare actual implementation to design_system spec
+3. Use browser DevTools to inspect:
+   - Computed styles (font-family, font-size, colors, spacing)
+   - CSS custom properties (:root variables)
+   - Color contrast (DevTools has built-in contrast checker)
+4. Take screenshots showing design system compliance
+5. If ANY checklist item fails → FIX IT before marking test as passing
+
+**CRITICAL RULE**: Design system violations are BUGS. Do NOT mark test as passing if design_system is not followed exactly.
+
+#### READ THE DESIGN_SYSTEM SECTION FIRST
+
+Before implementing ANY feature:
+1. Open `app_spec.txt`
+2. Read the ENTIRE `<design_system>` section
+3. Reference it constantly during implementation
+4. Verify against it during testing
+
+**DO NOT SKIP THIS STEP.**
 
 ### STEP 4: CHOOSE ONE FEATURE TO IMPLEMENT
 
@@ -403,10 +502,19 @@ Always capture a screenshot after key interactions to verify visual state.
 
 **Quality Bar:**
 
-- Zero console errors
-- Polished UI matching the design specified in app_spec.txt
+- Zero console errors or warnings
+- **Design system compliance:** Typography, colors, components, animations match app_spec.txt design_system section EXACTLY
+- **Visual polish:** Distinctive design (NOT Inter/Roboto fonts, NOT purple gradients, NOT flat backgrounds)
+- **Component quality:** All states implemented (default, hover, focus, active, disabled)
+- **Pixel-perfect:** Exact Tailwind classes from design_system (NO approximations)
+- **CSS variables:** All colors use variables (bg-primary) NOT hardcoded (bg-blue-500)
+- **Spacing scale:** NO arbitrary values (p-[17px]), use scale (p-4, gap-6, space-y-8)
+- **Motion:** Purposeful animations per design_system (page load stagger, hover transitions)
+- **Atmosphere:** Backgrounds create depth (gradients, patterns, blur) per design_system
+- **Accessibility:** WCAG AA compliance (4.5:1 text, 3:1 UI), visible focus indicators
 - All features work end-to-end through the UI
 - Fast, responsive, professional
+- **Pass design system validation checklist before marking tests complete**
 
 **You have unlimited time.** Take as long as needed to get it right. The most important thing is that you leave the code base in a clean state before terminating the session (Step 10).
 

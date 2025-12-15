@@ -117,11 +117,47 @@ If `grist_schema.txt` exists, ensure that the feature list includes tests for:
   },
   {
     "category": "style",
-    "description": "Brief description of UI/UX requirement",
+    "description": "Verify typography matches design_system: headings use specified font family, weights, and sizes",
     "steps": [
-      "Step 1: Navigate to page",
-      "Step 2: Take screenshot",
-      "Step 3: Verify visual requirements"
+      "Step 1: Navigate to homepage",
+      "Step 2: Take screenshot of page showing heading hierarchy",
+      "Step 3: Open browser DevTools, inspect H1 element",
+      "Step 4: Verify computed font-family matches design_system specification exactly",
+      "Step 5: Verify font-size, font-weight, line-height match design_system",
+      "Step 6: Inspect H2, H3 elements and verify they follow typography scale",
+      "Step 7: Inspect body text and verify font-family and line-height",
+      "Step 8: Check letter-spacing (tracking) if specified in design_system"
+    ],
+    "passes": false
+  },
+  {
+    "category": "style",
+    "description": "Verify color palette implementation: CSS variables defined, values match design_system hex codes",
+    "steps": [
+      "Step 1: Navigate to application",
+      "Step 2: Open browser DevTools, inspect root element (:root or html)",
+      "Step 3: Check Computed styles for CSS custom properties",
+      "Step 4: Verify --color-primary value matches hex code from design_system exactly",
+      "Step 5: Verify --color-background, --color-surface, --color-text match design_system",
+      "Step 6: Take screenshot showing primary color usage in buttons/links",
+      "Step 7: Verify components use CSS variables (bg-primary) NOT hardcoded colors (bg-blue-500)",
+      "Step 8: Check accent color usage matches design_system specifications"
+    ],
+    "passes": false
+  },
+  {
+    "category": "style",
+    "description": "Verify button component styling: exact Tailwind classes, all states match design_system",
+    "steps": [
+      "Step 1: Navigate to page with primary button",
+      "Step 2: Take screenshot of button in default state",
+      "Step 3: Inspect button element, verify exact Tailwind classes from design_system",
+      "Step 4: Verify height (h-10), padding (px-4 py-2), border-radius (rounded-md) match spec",
+      "Step 5: Hover over button, take screenshot, verify hover state (bg-primary/90, transition)",
+      "Step 6: Verify transition-colors duration-200 is applied",
+      "Step 7: Click button (active state), verify active:scale-[0.98] feedback",
+      "Step 8: Tab to button, verify focus ring (ring-2 ring-primary ring-offset-2)",
+      "Step 9: Find disabled button, verify opacity-50 and cursor-not-allowed"
     ],
     "passes": false
   }
@@ -130,7 +166,9 @@ If `grist_schema.txt` exists, ensure that the feature list includes tests for:
 
 **Requirements for feature_list.json:**
 
-- Minimum 25-50 features total with testing steps for each
+- Minimum 50-75 features total with testing steps for each:
+  * 30-45 functional tests (core features, edge cases, error handling)
+  * 20-30 visual/design tests (typography, colors, components, animations, accessibility)
 - Both "functional" and "style" categories
 - Mix of narrow tests (2-5 steps) and comprehensive tests (10+ steps)
 - At least 10 tests MUST have 10+ steps each
@@ -143,6 +181,104 @@ IT IS CATASTROPHIC TO REMOVE OR EDIT FEATURES IN FUTURE SESSIONS.
 Features can ONLY be marked as passing (change "passes": false to "passes": true).
 Never remove features, never edit descriptions, never modify testing steps.
 This ensures no functionality is missed.
+
+### VISUAL/DESIGN TEST REQUIREMENTS (MANDATORY)
+
+**Visual tests are as important as functional tests.** They ensure the design_system from `app_spec.txt` is actually implemented pixel-perfectly.
+
+**MINIMUM VISUAL TEST COVERAGE (20-30 tests out of 50-75 total):**
+
+You MUST create AT LEAST **20-30 visual/design tests** covering:
+
+1. **Typography Tests (minimum 4-5 tests):**
+   - Heading font families verification (H1, H2, H3 use correct fonts from design_system)
+   - Body font verification (paragraph, list, UI text use correct fonts)
+   - Font size scale verification (sizes match design_system exactly)
+   - Font weights and line heights verification
+   - Letter spacing (tracking) verification if specified
+
+2. **Color System Tests (minimum 4-5 tests):**
+   - CSS variable definition verification (all colors defined in :root)
+   - Color value verification (hex codes match design_system exactly)
+   - Component color usage (buttons, links use CSS variables not hardcoded)
+   - Contrast ratio verification (WCAG AA compliance)
+
+3. **Component Style Tests (minimum 6-8 tests):**
+   - Button component all states (default, hover, active, disabled, focus)
+   - Input component all states (default, focus, error, disabled)
+   - Card component styling (shadows, borders, spacing, hover)
+   - Modal/dialog styling if applicable
+   - Navigation component styling
+   - Form elements consistency
+
+4. **Animation/Motion Tests (minimum 3-4 tests):**
+   - Page load animations (staggered reveals as specified in design_system)
+   - Hover transitions (verify duration-200, easing)
+   - Focus state animations (ring appearance)
+   - Modal/overlay animations (fade, scale as specified)
+
+5. **Layout/Spacing Tests (minimum 2-3 tests):**
+   - Spacing scale verification (margins, padding use defined scale)
+   - Component spacing consistency (gaps between elements)
+   - Responsive breakpoints (mobile, tablet, desktop layouts)
+
+6. **Background/Atmosphere Tests (minimum 1-2 tests):**
+   - Background treatments (gradients, patterns, blur as specified)
+   - Card elevation (shadows create depth)
+   - Layering and depth perception
+
+7. **Accessibility Tests (minimum 2-3 tests):**
+   - Color contrast ratios (use DevTools to verify 4.5:1 text, 3:1 UI)
+   - Focus indicators visible and styled correctly
+   - Keyboard navigation works (tab order, visible focus)
+   - Reduced motion support if specified
+
+**VISUAL TEST STRUCTURE:**
+
+Each visual test MUST:
+- Reference specific section of design_system (e.g., "typography.headings")
+- Include specific verification steps using browser DevTools
+- Take screenshots for visual verification
+- Verify SPECIFIC values (hex codes, font names, Tailwind classes, pixel values, durations)
+- NOT be vague ("check if it looks good") but measurable ("verify h-10 class applied")
+
+**GOOD VISUAL TEST EXAMPLE (SPECIFIC & MEASURABLE)**:
+```json
+{
+  "category": "style",
+  "description": "Verify primary button implements design_system component_styles.buttons.primary with exact Tailwind classes, colors, and transitions",
+  "steps": [
+    "Step 1: Navigate to page with primary button (e.g., login page)",
+    "Step 2: Take screenshot of button in default state",
+    "Step 3: Inspect button element in DevTools",
+    "Step 4: Verify classes include: h-10 px-4 py-2 rounded-md font-medium",
+    "Step 5: Verify computed background-color matches --color-primary from design_system",
+    "Step 6: Verify text color has sufficient contrast (4.5:1 minimum using DevTools)",
+    "Step 7: Hover over button, verify background changes to primary/90",
+    "Step 8: Verify transition-colors duration-200 is applied (check DevTools Computed)",
+    "Step 9: Click button, verify active:scale-[0.98] visual feedback",
+    "Step 10: Tab to button, verify focus ring (ring-2 ring-primary ring-offset-2)",
+    "Step 11: Find disabled button, verify opacity-50 and cursor-not-allowed"
+  ],
+  "passes": false
+}
+```
+
+**BAD VISUAL TEST EXAMPLE (TOO VAGUE)**:
+```json
+{
+  "category": "style",
+  "description": "Verify button looks good",
+  "steps": [
+    "Step 1: Navigate to page",
+    "Step 2: Take screenshot",
+    "Step 3: Check button appearance"
+  ],
+  "passes": false
+}
+```
+
+**CRITICAL:** Visual tests are NOT optional - they prevent visual regression and ensure professional polish.
 
 ### SECOND TASK: Create init.sh
 

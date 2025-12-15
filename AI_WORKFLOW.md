@@ -45,8 +45,8 @@ Cascade defines five distinct roles for the AI to play. You will use these agent
 - **Command:** `@project-initializer`
 - **Role:** Reads the spec (`app_spec.txt`) and Grist schema (`grist_schema.txt` if it exists) and sets up the physical project structure.
 - **Input:** `app_spec.txt` (required), `grist_schema.txt` (optional, if Grist is used)
-- **Output:** `feature_list.json` (25-50 test cases), `init.sh` (environment setup), `.gitignore`, git repository, and project structure
-- **Key Task:** Generates `feature_list.json` containing **25-50** strictly defined test cases (functional & stylistic).
+- **Output:** `feature_list.json` (50-75 test cases: 30-45 functional + 20-30 visual), `init.sh` (environment setup), `.gitignore`, git repository, and project structure
+- **Key Task:** Generates `feature_list.json` containing **50-75** strictly defined test cases: 30-45 functional tests and 20-30 visual/design tests ensuring pixel-perfect design system compliance.
 
 ### 4. The Coding Agent (Developer)
 

@@ -75,10 +75,217 @@ The user input may be vague or may contain some contradictions. You MUST fill in
   - **Decision criteria:** If the user mentions "sync", "multiple devices", "mobile and desktop", "cloud", "collaboration", or similar → choose Grist. If the app is explicitly local-only, single-user, pc-only, or offline-only → choose SQLite.
 - **Tech Stack Defaults:**
   - If no stack is specified or user does not have any preference or is not sure about what stack to use, default to: React + Vite (Frontend), Node/Express (Backend), Grist (DB) or SQLite (DB) based on sync requirements above.
-- **Design Defaults:**
-  - If no design is specified, default to: Modern, clean, responsive (Tailwind CSS).
+- **Design Defaults (CRITICAL - AVOID AI SLOP):**
+  - If no design is specified, you MUST create a detailed, distinctive design system.
+  - **NEVER default to generic choices.**
+  - **Ask the user about design preferences** before proceeding:
+    * What is the app's primary purpose? (productivity, content, e-commerce, etc.)
+    * What mood should the design convey? (professional, playful, minimal, bold, etc.)
+    * Any color preferences or brand colors?
+    * Any typography preferences? (modern sans, classic serif, technical mono, etc.)
+  - **Based on user input, suggest a cohesive design direction** with specific rationale
+  - **Anti-patterns to AVOID:**
+    * Generic font stacks: Inter, Roboto, Arial, Space Grotesk, system-ui (overused)
+    * Clichéd colors: purple gradients, generic blues
+    * Vague descriptions: "modern", "clean", "professional" without specifics
+  - **Design system MUST include all required sections** (see below)
 - **Details:**
   - You must invent necessary details (e.g., specific database columns, API endpoints) to make the app functional.
+
+### DESIGN SYSTEM CREATION (MANDATORY)
+
+**This is a CRITICAL step - do NOT skip or rush through it.**
+
+The `<design_system>` section in `app_spec.txt` is **MANDATORY** and must be comprehensive. This section directly determines the aesthetic quality of the final application.
+
+**STEP-BY-STEP DESIGN SYSTEM CREATION:**
+
+1. **Understand the App Context:**
+   - Review the user's app description and primary purpose
+   - Consider the target audience and use case
+   - Identify any brand guidelines or design constraints
+
+2. **Ask User About Design Preferences:**
+   Present 3-4 design direction options based on the app context:
+   - **Option A**: Describe a distinctive creative theme (unique typography, bold colors, atmospheric backgrounds)
+   - **Option B**: Describe a professional/dashboard aesthetic (data-focused, restrained palette, clarity)
+   - **Option C**: Describe a minimal refined approach (understated elegance, monochromatic, typography-focused)
+   - **Option D**: Custom based on user's brand/preferences
+
+   For the user's chosen direction, follow up with:
+   - Primary color preference (if any)
+   - Typography style (modern sans, classic serif, technical mono, etc.)
+   - Overall mood (serious, playful, energetic, calm, etc.)
+
+3. **Create Distinctive Design System:**
+
+   Based on user input, create a **complete and specific** design_system section.
+
+   **CRITICAL ANTI-PATTERNS TO AVOID:**
+   - ❌ Overused fonts: Inter, Roboto, Arial, Space Grotesk, system fonts
+   - ❌ Clichéd colors: purple gradients on white, blue-500/purple-500 defaults
+   - ❌ Predictable layouts: cookie-cutter patterns
+   - ❌ Timid palettes: evenly-distributed colors with no dominant theme
+   - ❌ Flat backgrounds: single-color backgrounds without depth
+
+   **REQUIRED APPROACH:**
+   - ✅ Typography: Choose beautiful, unique, interesting fonts that elevate the aesthetic
+   - ✅ Color & Theme: Commit to a cohesive aesthetic with dominant colors and sharp accents
+   - ✅ Motion: Specify purposeful animations for high-impact moments (page load with staggered reveals)
+   - ✅ Backgrounds: Create atmosphere and depth (layered gradients, geometric patterns, contextual effects)
+   - ✅ Creative Choices: Make unexpected decisions that feel genuinely designed for the context
+
+4. **Complete ALL Design System Sections:**
+
+   The `<design_system>` section MUST include (minimum requirements):
+
+   ```xml
+   <design_system>
+     <inspiration>
+       <!-- 2-3 sentences explaining the design direction and WHY it fits this app -->
+       <!-- Example: "Drawing from editorial design, using Lora serif for headings to convey -->
+       <!-- authority and readability. Warm terracotta and amber accent colors create an -->
+       <!-- inviting, premium feel appropriate for a content-focused application." -->
+     </inspiration>
+
+     <color_palette>
+       <!-- List ALL colors with CSS variable names, hex codes, and usage -->
+       <!-- MUST include: primary, secondary, background, surface, text, borders, accent, error, success, warning -->
+       <!-- Example:
+       - Primary: var(--color-primary, #D4725C) - Warm terracotta, used for CTAs and accents
+       - Background: var(--color-bg, #FAFAF9) - Warm off-white for reduced eye strain
+       - Surface: var(--color-surface, #FFFFFF) - Pure white for cards and elevated content
+       - Text Primary: var(--color-text, #1A1410) - Warm dark brown for body text
+       - Accent: var(--color-accent, #E8A542) - Amber for highlights and interactive states
+       -->
+     </color_palette>
+
+     <typography>
+       <!-- Font families for headings, body, code, and UI elements -->
+       <!-- MUST include: actual font names (NOT "system-ui"), font weights, line heights, letter spacing -->
+       <!-- MUST include justification for font choices -->
+       <!-- Example:
+       - Headings: 'Lora', Georgia, serif
+         - Rationale: Lora provides editorial authority and excellent readability
+         - Weights: 400 (regular), 600 (semibold), 700 (bold)
+         - Line height: 1.2 for headings, 1.4 for subheadings
+       - Body: 'Inter', 'SF Pro Text', sans-serif
+         - Rationale: Inter optimized for UI readability at small sizes
+         - Weights: 400 (regular), 500 (medium), 600 (semibold)
+         - Line height: 1.6 for comfortable reading
+       - Code: 'JetBrains Mono', 'Fira Code', monospace
+         - Line height: 1.5
+       -->
+     </typography>
+
+     <spacing_scale>
+       <!-- Define spacing system (4px base unit recommended) -->
+       <!-- Example:
+       - Base unit: 4px
+       - Scale: 0.5 (2px), 1 (4px), 2 (8px), 3 (12px), 4 (16px), 6 (24px), 8 (32px), 12 (48px), 16 (64px), 24 (96px)
+       - Usage: Use scale values consistently (p-4, gap-6, space-y-8)
+       - NO arbitrary values like p-[17px]
+       -->
+     </spacing_scale>
+
+     <component_styles>
+       <!-- Detailed specs for buttons, inputs, cards, modals -->
+       <!-- MUST include: exact Tailwind classes, sizes, border radius, shadows, hover states, active, disabled -->
+       <!-- Example:
+       <buttons>
+         <primary>
+           - Base: h-10 px-4 py-2 bg-primary text-white rounded-md font-medium
+           - Hover: hover:bg-primary/90 transition-colors duration-200
+           - Active: active:scale-[0.98]
+           - Disabled: disabled:opacity-50 disabled:cursor-not-allowed
+           - Focus: focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
+         </primary>
+         <secondary>
+           - Base: h-10 px-4 py-2 border border-gray-300 rounded-md font-medium
+           - Hover: hover:bg-gray-50 transition-colors duration-200
+           - Active: active:scale-[0.98]
+         </secondary>
+       </buttons>
+
+       <inputs>
+         - Base: h-10 px-3 py-2 border border-gray-300 rounded-md bg-white
+         - Focus: focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
+         - Error: border-red-500 focus:ring-red-500
+         - Disabled: bg-gray-100 cursor-not-allowed opacity-60
+         - Placeholder: placeholder:text-gray-400
+       </inputs>
+
+       <cards>
+         - Base: rounded-xl border border-gray-200 bg-surface shadow-sm p-6
+         - Hover: hover:shadow-md transition-shadow duration-200
+         - Interactive: cursor-pointer hover:border-gray-300
+       </cards>
+       -->
+     </component_styles>
+
+     <animations_motion>
+       <!-- Motion strategy: what moves, when, and how -->
+       <!-- MUST specify: transition durations, easing functions, animation effects -->
+       <!-- Example:
+       - Page Load: Staggered fade-in for main content sections
+         - First section: opacity 0->1, translateY(20px->0), duration-300, delay-0
+         - Second section: opacity 0->1, translateY(20px->0), duration-300, delay-100
+         - Third section: opacity 0->1, translateY(20px->0), duration-300, delay-200
+       - Hover Transitions: All interactive elements use duration-200 ease-out
+       - Focus States: Ring appears with duration-150
+       - Modal: Fade in overlay (duration-200), scale content 0.95->1 (duration-200)
+       - Micro-interactions: Button active state scale-[0.98] duration-100
+       -->
+     </animations_motion>
+
+     <backgrounds_depth>
+       <!-- Background treatments beyond solid colors -->
+       <!-- Example:
+       - Main background: Subtle gradient from warm-gray-50 to warm-gray-100
+       - Card backgrounds: Pure white with subtle shadow for elevation
+       - Header: Semi-transparent backdrop-blur-sm over gradient
+       - Accent sections: Layered gradient (primary/10 to primary/5)
+       -->
+     </backgrounds_depth>
+
+     <accessibility>
+       <!-- Contrast ratios, focus indicators, reduced motion support -->
+       <!-- Example:
+       - Color Contrast: WCAG AA minimum (4.5:1 for text, 3:1 for UI components)
+       - Focus Indicators: Visible 2px ring with offset on all interactive elements
+       - Keyboard Navigation: Full support with visible focus states
+       - Reduced Motion: @media (prefers-reduced-motion: reduce) removes animations
+       - Semantic HTML: Proper heading hierarchy, aria-labels on icon buttons
+       -->
+     </accessibility>
+
+     <responsive_breakpoints>
+       <!-- Mobile-first breakpoints and how design adapts -->
+       <!-- Example:
+       - Mobile (default): Single column, stack all content, 16px padding
+       - Tablet (768px): Two columns where appropriate, 24px padding
+       - Desktop (1024px): Full layout, 32px padding, max-width constraints
+       - Wide (1280px): Increased whitespace, larger typography scale
+       -->
+     </responsive_breakpoints>
+   </design_system>
+   ```
+
+5. **Validation Checklist:**
+
+   Before finalizing `app_spec.txt`, verify:
+   - [ ] Have you asked the user about design preferences?
+   - [ ] Is the design system COMPLETE with all sections above?
+   - [ ] Did you avoid generic fonts (Inter, Roboto, Arial, Space Grotesk)?
+   - [ ] Did you avoid clichéd colors (purple gradients)?
+   - [ ] Are font choices JUSTIFIED (explained WHY)?
+   - [ ] Are colors specified with hex codes AND CSS variable names?
+   - [ ] Are component styles detailed with exact Tailwind classes?
+   - [ ] Is there a clear animation/motion strategy?
+   - [ ] Does the design fit the app's context and purpose?
+   - [ ] Have you specified WCAG contrast requirements?
+
+**CRITICAL:** If you cannot answer "yes" to ALL validation questions, your design_system section is incomplete.
 
 ### STEP 2: DEFINE THE ARCHITECTURE
 
@@ -172,11 +379,18 @@ It MUST use the following XML-like tag structure exactly.
     </technical_quality>
 
     <design_polish>
-      - Beautiful typography and spacing
-      - Smooth animations and micro-interactions
-      - Excellent contrast and accessibility
-      - Professional, polished appearance
-      - Dark mode fully implemented
+      - Typography: Distinctive font choices from design_system (NOT Inter/Roboto/Arial)
+      - Color System: Cohesive palette with sharp accents from design_system (NOT generic purple gradients)
+      - Spacing: Consistent rhythm using defined spacing scale (4px base unit)
+      - Animations: Purposeful motion from design_system (page load stagger, hover transitions)
+      - Component Quality: All states implemented (default, hover, focus, active, disabled)
+      - Micro-interactions: Smooth transitions (150-300ms) on all interactive elements
+      - Visual Hierarchy: Clear distinction using typography scale from design_system
+      - Contrast: WCAG AA compliance minimum (4.5:1 text, 3:1 UI) from design_system
+      - Atmosphere: Backgrounds create depth (gradients, patterns, blur) from design_system
+      - Consistency: Design system followed exactly throughout entire application
+      - Professional Polish: App looks intentionally designed (NOT generic AI output)
+      - Pixel-Perfect: Implementation matches design_system specifications exactly
       - [add more if necessary and adapt the list above]
     </design_polish>
     </success_criteria>
