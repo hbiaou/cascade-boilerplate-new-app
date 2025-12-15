@@ -169,9 +169,9 @@ The `<design_system>` section in `app_spec.txt` is **MANDATORY** and must be com
          - Rationale: Lora provides editorial authority and excellent readability
          - Weights: 400 (regular), 600 (semibold), 700 (bold)
          - Line height: 1.2 for headings, 1.4 for subheadings
-       - Body: 'Inter', 'SF Pro Text', sans-serif
-         - Rationale: Inter optimized for UI readability at small sizes
-         - Weights: 400 (regular), 500 (medium), 600 (semibold)
+       - Body: 'DM Sans', 'Nunito Sans', sans-serif
+         - Rationale: DM Sans offers geometric precision with warmth, excellent legibility at UI sizes
+         - Weights: 400 (regular), 500 (medium), 700 (bold)
          - Line height: 1.6 for comfortable reading
        - Code: 'JetBrains Mono', 'Fira Code', monospace
          - Line height: 1.5
