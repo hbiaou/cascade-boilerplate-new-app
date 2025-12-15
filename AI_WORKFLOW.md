@@ -12,13 +12,31 @@ As a boilerplate, this project aims to:
 
 1. **Kickstart Projects:** Eliminate the repetitive setup of defining how the AI should behave.
 2. **Enforce Standards:** Ensure every project starts with a robust specification (`app_spec.txt`) and a rigorous testing plan (`feature_list.json`).
-3. **Ensure Quality:** Mandate a "Test-First" development approach using real browser automation (Playwright) rather than fragile DOM emulation.
+3. **Ensure Quality:** Mandate a "Test-First" development approach using real browser automation (chrome-devtools MCP) rather than fragile DOM emulation.
 
-## The Five-Agent Workflow
+## The Five-Agent Workflow (Plus On-Demand QA)
 
-Cascade defines five distinct roles for the AI to play. You will use these agents sequentially, with the Grist Database Specialist being optional (only when using Grist as your backend). The agents cascade from one to the next, each building upon the previous agent's output.
+Cascade defines five distinct roles for the AI to play sequentially, with the Grist Database Specialist being optional (only when using Grist as your backend). Additionally, a QA Engineer agent is available on-demand for testing and documentation. The agents cascade from one to the next, each building upon the previous agent's output.
 
 ![](templates/workflow-diagram.jpg)
+
+### Workflow Sequence
+
+**Core Development Flow:**
+
+```text
+1. @architect → app_spec.txt
+2. @grist-database-specialist (optional) → grist_schema.txt
+3. @project-initializer → feature_list.json + init.sh
+4. @coder → implements/verifies features
+5. @release-engineer → versioning (automatic)
+```
+
+**On-Demand:**
+
+```text
+@qa-engineer → qa_report.md (anytime for testing/docs)
+```
 
 ### 1. The Specification Writer (Architect)
 
@@ -55,7 +73,7 @@ Cascade defines five distinct roles for the AI to play. You will use these agent
 - **Role:** An iterative worker that picks **one** failing test, implements the code, and verifies it using browser automation.
 - **Input:** `app_spec.txt`, `feature_list.json`, `init.sh` (required), `grist_schema.txt`, `claude-progress.txt` (optional)
 - **Output:** Application code files (unpredictable, depends on tech stack), updates to `feature_list.json` (pass/fail status only), updates to `claude-progress.txt`
-- **Tooling:** Configured to use **Playwright MCP** for visual regression testing and end-to-end verification.
+- **Tooling:** Configured to use **chrome-devtools MCP** for visual regression testing and end-to-end verification. Playwright MCP can be used as an alternative (requires updating tool references in `@coder`).
 - **Constraint:** Cannot move to feature B until feature A passes.
 
 ### 5. The Release Engineer (Finalization)
@@ -68,6 +86,16 @@ Cascade defines five distinct roles for the AI to play. You will use these agent
 - **When to use:** When you're ready to tag a versioned release (after all required tests pass, or for pre-releases like alpha/beta/rc).
 - **Why:** Ensures professional, error-free releases following semantic versioning best practices.
 
+### 6. The QA Engineer (On-Demand)
+
+- **Agent File:** `.claude/agents/qa-engineer.md`
+- **Command:** `@qa-engineer`
+- **Role:** Performs on-demand Black-Box testing (Simulating User Journeys, Smoke Tests, Monkey Testing) and maintains documentation. Strictly forbidden from modifying application codebase.
+- **Input:** User testing request (e.g., "Run smoke test"), `app_spec.txt`, `.env` (credentials)
+- **Output:** `qa_report.md` (for Architect consumption) or updated Documentation (README, guides).
+- **When to use:** Anytime you need to simulate a user, verify a specific flow, or update documentation.
+- **Why:** Adds a layer of "human-like" quality assurance that automated unit tests miss. Can also generate visual bug reports and keep docs in sync with code.
+
 ## Repository Structure
 
 ```text
@@ -76,11 +104,12 @@ cascade/
 │   └── agents/
 │       ├── architect.md                    # Agent 1: Creates the Blueprint (app_spec.txt)
 │       ├── grist-database-specialist.md    # Agent 2 (Optional): Grist DB setup & integration
-│       ├── project-initializer.md           # Agent 3: Sets the Foundation (feature_list.json, init.sh)
-│       ├── coder.md                         # Agent 4: Builds the House (iterative development)
-│       └── release-engineer.md              # Agent 5: Finalizes releases (versioning & tagging)
+│       ├── project-initializer.md          # Agent 3: Sets the Foundation (feature_list.json, init.sh)
+│       ├── coder.md                        # Agent 4: Builds the House (iterative development)
+│       ├── release-engineer.md             # Agent 5: Finalizes releases (versioning & tagging)
+│       └── qa-engineer.md                  # Agent 6 (On-Demand): Black-box testing & documentation
 ├── templates/
-│   └── app_spec_example.txt                 # Reference implementation of a spec file
+│   └── app_spec_example.txt                # Reference implementation of a spec file
 └── AI_WORKFLOW.md
 ```
 
@@ -97,8 +126,9 @@ cascade/
 To use Cascade effectively, you need:
 
 1. **An LLM Interface:** (e.g., Claude Code, Google Antigravity, Cursor, or a CLI).
-2. **Playwright MCP Server:** The Coding Agent is configured to use the Model Context Protocol (MCP) to control a headless browser.
-   - *Required Tools:* `browser_navigate`, `browser_click`, `browser_take_screenshot`, etc.
+2. **Chrome DevTools MCP Server:** The Coding Agent is configured to use the Model Context Protocol (MCP) to control Chrome browser for visual verification and testing.
+   - *Required Tools:* `mcp__chrome-devtools__navigate_page`, `mcp__chrome-devtools__click`, `mcp__chrome-devtools__take_screenshot`, `mcp__chrome-devtools__fill`, `mcp__chrome-devtools__list_console_messages`, etc.
+   - *Alternative:* Playwright MCP Server can be used instead. If you prefer Playwright, update the browser tool references in `@coder` agent file (`.claude/agents/coder.md`) to match Playwright's tool names.
 
 ## When to Use Which Agent
 
@@ -118,6 +148,10 @@ Each agent has specific trigger conditions:
 - **`@project-initializer`** (improvement mode): Use after `improvement_spec.txt` exists. Creates `improvement_list.json` with tests for new features only.
 - **`@coder`** (improvement mode): Automatically detects `improvement_list.json` and prioritizes improvements over original features. Merges improvement files after all improvements pass.
 - **`@release-engineer`**: Works identically in both workflows. Called automatically after each improvement completion.
+
+### On-Demand & Maintenance Agents
+
+- **`@qa-engineer`**: Use anytime for black-box testing, user journey simulation, or documentation updates. Generates `qa_report.md` which can be fed to `@architect` to request fixes for found issues. Does not modify application code, only tests it and updates documentation.
 
 ## Usage Guide
 

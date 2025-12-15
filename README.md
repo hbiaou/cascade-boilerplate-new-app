@@ -1,0 +1,274 @@
+# Cascade - Autonomous Coding Boilerplate
+
+## Overview
+
+**Cascade** is a **silent scaffolding system** for developing applications. It provides the intelligence to build an app, but it is designed to disappear from the final product. It serves as a **standardized scaffolding system** for building complex software applications using autonomous AI agents.
+
+Instead of starting from zero, Cascade provides the essential "instructional architecture" required to turn a high-level idea into a production-ready application. It implements a strictly defined **Five-Agent Workflow** that separates concerns between architectural planning, database setup (when needed), project initialization, iterative development, and release management.
+
+## Core Philosophy
+
+As a boilerplate, this project aims to:
+
+1. **Kickstart Projects:** Eliminate the repetitive setup of defining how the AI should behave.
+2. **Enforce Standards:** Ensure every project starts with a robust specification (`app_spec.txt`) and a rigorous testing plan (`feature_list.json`).
+3. **Ensure Quality:** Mandate a "Test-First" development approach using real browser automation rather than fragile DOM emulation.
+
+## Prerequisites
+
+To use Cascade effectively, you need:
+
+1. **An LLM Interface:** Claude Code CLI, Google Antigravity, Cursor, or similar AI-powered development environment.
+2. **Chrome Browser:** Google Chrome must be installed on your system for browser automation and visual verification.
+3. **Chrome DevTools MCP Server:** The Coding Agent uses the Model Context Protocol (MCP) to control Chrome DevTools for browser automation and visual verification.
+
+   **Installation:**
+
+   ```bash
+   # The chrome-devtools MCP server will be automatically available if you're using Claude Code
+   # For manual installation, add to your MCP client config:
+   npx chrome-devtools-mcp@latest
+   ```
+
+   **Required Tools (chrome-devtools):** `mcp__chrome-devtools__navigate_page`, `mcp__chrome-devtools__click`, `mcp__chrome-devtools__fill`, `mcp__chrome-devtools__take_screenshot`, `mcp__chrome-devtools__take_snapshot`, `mcp__chrome-devtools__list_console_messages`, `mcp__chrome-devtools__get_network_request`, etc.
+
+   **Alternative - Playwright MCP Server:** If you prefer Playwright over Chrome DevTools, you can use the Playwright MCP server instead. Note that you'll need to modify the browser tool references in the `@coder` agent file (`.claude/agents/coder.md`) to match Playwright's tool names.
+
+## The Five-Agent Workflow (Plus On-Demand QA)
+
+Cascade defines five distinct roles for the AI to play sequentially, with the Grist Database Specialist being optional (only when using Grist as your backend). Additionally, a QA Engineer agent is available on-demand for testing and documentation. The agents cascade from one to the next, each building upon the previous agent's output.
+
+### Workflow Sequence
+
+**Core Development Flow:**
+
+```text
+1. @architect → app_spec.txt
+2. @grist-database-specialist (optional) → grist_schema.txt
+3. @project-initializer → feature_list.json + init.sh
+4. @coder → implements/verifies features
+5. @release-engineer → versioning (automatic)
+```
+
+**On-Demand:**
+
+```text
+@qa-engineer → qa_report.md (anytime for testing/docs)
+```
+
+### The Agents
+
+#### 1. The Specification Writer (Architect)
+
+- **Command:** `@architect`
+- **Role:** Takes a vague user idea and converts it into a rigid, XML-structured technical requirement file.
+- **Input:** User conversation, optional documentation/mockups
+- **Output:** `app_spec.txt` - Complete technical specification in XML format
+- **Why:** Prevents "scope creep" and ensures the coding agent has a single source of truth. The spec should explicitly state the database backend choice (SQLite/Postgres/etc. vs Grist hosted).
+
+#### 2. The Grist Database Specialist (Optional)
+
+- **Command:** `@grist-database-specialist`
+- **Role:** Optional specialist step for projects choosing Grist (hosted free-tier) as the backend database. Produces a Grist schema + API integration plan and helps implement BYOK settings + offline-first caching patterns.
+- **Input:** `app_spec.txt` (required, to confirm Grist is specified as database backend)
+- **Output:** `grist_schema.txt` - Contains the complete Grist schema definition, table structure, API configuration requirements, and integration architecture. This file is read by the Project Initializer to understand the database setup.
+- **When to use:** Only when `app_spec.txt` specifies Grist as the database backend, or when the user explicitly wants to use Grist.
+- **Why:** Grist requires specialized setup (REST API access, schema design, caching strategies) that differs from traditional SQL databases.
+
+#### 3. The Project Initializer (Project Lead)
+
+- **Command:** `@project-initializer`
+- **Role:** Reads the spec (`app_spec.txt`) and Grist schema (`grist_schema.txt` if it exists) and sets up the physical project structure.
+- **Input:** `app_spec.txt` (required), `grist_schema.txt` (optional, if Grist is used)
+- **Output:** `feature_list.json` (50-75 test cases: 30-45 functional + 20-30 visual), `init.sh` (environment setup), `.gitignore`, git repository, and project structure
+- **Key Task:** Generates `feature_list.json` containing **50-75** strictly defined test cases: 30-45 functional tests and 20-30 visual/design tests ensuring pixel-perfect design system compliance.
+
+#### 4. The Coding Agent (Developer)
+
+- **Command:** `@coder`
+- **Role:** An iterative worker that picks **one** failing test, implements the code, and verifies it using browser automation.
+- **Input:** `app_spec.txt`, `feature_list.json`, `init.sh` (required), `grist_schema.txt`, `claude-progress.txt` (optional)
+- **Output:** Application code files (unpredictable, depends on tech stack), updates to `feature_list.json` (pass/fail status only), updates to `claude-progress.txt`
+- **Tooling:** Configured to use **chrome-devtools MCP** for visual regression testing and end-to-end verification. Playwright MCP can be used as an alternative (requires updating tool references in `@coder`).
+- **Constraint:** Cannot move to feature B until feature A passes.
+
+#### 5. The Release Engineer (Finalization)
+
+- **Command:** `@release-engineer`
+- **Role:** Final step that performs SemVer versioning, changelog updates, annotated tags, and pre-flight checks. Does not deploy.
+- **Input:** Version manifest files (package.json, pyproject.toml, Cargo.toml, etc.), git repository, `CHANGELOG.md` (optional, creates if missing)
+- **Output:** Updated version manifests, `CHANGELOG.md` (created or updated), annotated git tags (`v{version}`), release commit
+- **When to use:** Called AUTOMATICALLY by the coder agent after each feature completion. Can also be called manually for milestone releases.
+- **Why:** Ensures professional, error-free releases following semantic versioning best practices.
+
+#### 6. The QA Engineer (On-Demand)
+
+- **Command:** `@qa-engineer`
+- **Role:** Performs on-demand Black-Box testing (Simulating User Journeys, Smoke Tests, Monkey Testing) and maintains documentation. Strictly forbidden from modifying application codebase.
+- **Input:** User testing request (e.g., "Run smoke test"), `app_spec.txt`, `.env` (credentials)
+- **Output:** `qa_report.md` (for Architect consumption) or updated Documentation (README, guides).
+- **When to use:** Anytime you need to simulate a user, verify a specific flow, or update documentation.
+- **Why:** Adds a layer of "human-like" quality assurance that automated unit tests miss. Can also generate visual bug reports and keep docs in sync with code.
+
+## Quick Start
+
+### Step 1: Scaffolding
+
+Clone this repository to your local machine when you want to start a NEW app.
+
+### Step 2: Define the Spec
+
+Run this command to start the Architect session:
+
+```bash
+@architect. I want to build a [Your Idea Here]...
+```
+
+Wait for the agent to generate `app_spec.txt`. The spec will explicitly state the database backend choice.
+
+### Step 3: (Optional) Grist Database Setup
+
+**Only if using Grist as your backend database:**
+
+```bash
+@grist-database-specialist. Set up Grist database schema and API integration
+```
+
+The agent will guide you through creating the Grist document, designing the schema, and implementing the API client/service layer with BYOK configuration.
+
+### Step 4: Initialize
+
+```bash
+@project-initializer. Please setup the project based on the app_spec.txt
+```
+
+The agent will generate the folder structure, install dependencies, and create the test plan (`feature_list.json`).
+
+### Step 5: Build the App (The Loop)
+
+Now, you simply iterate with the Coder. Run this command repeatedly:
+
+```bash
+@coder. Fix the next failing test.
+```
+
+**Important:** After each feature is completed and verified, the Coder agent will AUTOMATICALLY call the Release Engineer to create an incremental release. This means:
+
+- Each completed feature gets its own version tag (typically PATCH bumps: 1.2.3 → 1.2.4)
+- The changelog is updated incrementally with each feature
+- Version history is maintained throughout development
+- You don't need to manually call the release-engineer during the build loop
+
+*Repeat Step 5 until all tests pass. The release-engineer will be called automatically after each feature completion.*
+
+### Step 6: Final Release (Optional)
+
+If you want to create a milestone release (e.g., moving from 0.x.x to 1.0.0, or creating a beta/rc release), you can manually call:
+
+```bash
+@release-engineer. Create a milestone release
+```
+
+This is optional - the automatic incremental releases during development are sufficient for most cases.
+
+## Iterative Improvement Workflow
+
+After your initial app development is complete, you can add new features using the improvement workflow:
+
+```text
+1. @architect (improvement mode) → improvement_spec.txt
+2. @project-initializer (improvement mode) → improvement_list.json
+3. @coder (improvement mode) → implements/verifies improvements
+4. @release-engineer → versioning (automatic)
+```
+
+Example:
+
+```bash
+@architect I want to add dark mode toggle and user preferences
+@project-initializer Set up tests for the improvements
+@coder Work on the improvements
+```
+
+## Repository Structure
+
+```text
+cascade/
+├── .claude/
+│   └── agents/
+│       ├── architect.md                    # Agent 1: Creates the Blueprint (app_spec.txt)
+│       ├── grist-database-specialist.md    # Agent 2 (Optional): Grist DB setup & integration
+│       ├── project-initializer.md          # Agent 3: Sets the Foundation (feature_list.json, init.sh)
+│       ├── coder.md                        # Agent 4: Builds the House (iterative development)
+│       ├── release-engineer.md             # Agent 5: Finalizes releases (versioning & tagging)
+│       └── qa-engineer.md                  # Agent 6 (On-Demand): Black-box testing & documentation
+├── templates/
+│   └── app_spec_example.txt                # Reference implementation of a spec file
+└── AI_WORKFLOW.md                          # Detailed workflow guide
+```
+
+## Known Issues & Troubleshooting
+
+### Browser Automation with Docker (If Using Playwright MCP)
+
+If you choose to use Playwright MCP through Docker instead of Chrome DevTools MCP, note that Playwright runs in a Docker container and requires special configuration:
+
+**Problem:** Browser cannot access `localhost` directly because it resolves to the container, not your host machine.
+
+**Solution:** Use `host.docker.internal` hostname and configure your dev server:
+
+**Required Vite Configuration:**
+
+```typescript
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    host: '0.0.0.0', // Listen on all interfaces
+    port: 3000,      // Or your project's port
+    strictPort: true,
+    allowedHosts: [
+      'host.docker.internal', // REQUIRED for Docker browser access
+      'localhost',
+      '127.0.0.1'
+    ]
+  }
+})
+```
+
+**Browser Navigation (Playwright only):**
+
+```typescript
+// Navigate using host.docker.internal
+browser_navigate("http://host.docker.internal:3000")
+```
+
+**Note:** Chrome DevTools MCP does NOT have this issue as it accesses localhost directly without Docker.
+
+## Contributing
+
+Cascade is a living boilerplate. If you find that the agents consistently fail at a specific task (e.g., database setup), update the relevant agent file in `.claude/agents/` to provide better "gap-filling" logic.
+
+## Acknowledgments & Inspiration
+
+Cascade was inspired by research and best practices from the AI agent development community. We gratefully acknowledge the following sources:
+
+### Primary Inspiration
+
+- **"AI Agents That Actually Work"** by Nate B Jones
+  YouTube Video: [https://www.youtube.com/watch?v=xNcEgqzlPqs](https://www.youtube.com/watch?v=xNcEgqzlPqs)
+  YouTube Channel: [AI News &amp; Strategy Daily | Nate B Jones](https://www.youtube.com/@NateBJones)
+  *This video provided the primary inspiration for Cascade's multi-agent workflow architecture.*
+
+### Additional References
+
+- **"Effective harnesses for long-running agents"** by Anthropic
+  Blog Post: [https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)
+  *This research informed our approach to incremental progress tracking, feature lists, and session management across multiple context windows.*
+- **Anthropic Autonomous Coding Quickstart**
+  GitHub Repository: [https://github.com/anthropics/claude-quickstarts/tree/main/autonomous-coding](https://github.com/anthropics/claude-quickstarts/tree/main/autonomous-coding)
+  *This quickstart provided valuable insights into initializer and coding agent patterns, testing strategies, and environment management.*
+
+These resources collectively shaped Cascade's design philosophy of using specialized agents, structured feature tracking, and incremental development to enable long-running autonomous coding workflows.

@@ -462,33 +462,64 @@ Before context fills up:
 
 **ALL testing must use browser automation tools.**
 
-Available tools:
+Available chrome-devtools MCP tools (organized by category):
 
-* `browser_click` - Click
-* `browser_close` - Close browser
-* `browser_console_messages` - Get console messages
-* `browser_drag` - Drag mouse
-* `browser_evaluate` - Evaluate JavaScript (use sparingly, only for debugging)
-* `browser_file_upload` - Upload files
-* `browser_fill_form` - Fill form
-* `browser_handle_dialog` - Handle a dialog
-* `browser_hover` - Hover mouse
-* `browser_install` - Install the browser specified in the config
-* `browser_navigate` - Navigate to a URL
-* `browser_navigate_back` - Go back
-* `browser_network_requests` - List network requests
-* `browser_press_key` - Press a key
-* `browser_resize` - Resize browser window
-* `browser_run_code` - Run Playwright code
-* `browser_select_option` - Select option
-* `browser_snapshot` - Page snapshot
-* `browser_tabs` - Manage tabs
-* `browser_take_screenshot` - Take a screenshot (critical for verification)
-* `browser_type` - Type text
-* `browser_wait_for` - Wait for
+**Input Automation:**
+
+* `mcp__chrome-devtools__click` - Click on an element
+* `mcp__chrome-devtools__drag` - Drag one element onto another
+* `mcp__chrome-devtools__fill` - Type text into input, textarea, or select an option
+* `mcp__chrome-devtools__fill_form` - Fill multiple form fields at once
+* `mcp__chrome-devtools__handle_dialog` - Handle browser dialogs (accept/dismiss)
+* `mcp__chrome-devtools__hover` - Hover over an element
+* `mcp__chrome-devtools__press_key` - Press keyboard keys (including modifier combinations)
+* `mcp__chrome-devtools__upload_file` - Upload files through file input elements
+
+**Navigation Automation:**
+
+* `mcp__chrome-devtools__close_page` - Close a page by index
+* `mcp__chrome-devtools__list_pages` - Get list of open browser pages
+* `mcp__chrome-devtools__navigate_page` - Navigate to URL or navigate history (back/forward/reload)
+* `mcp__chrome-devtools__new_page` - Create a new page
+* `mcp__chrome-devtools__select_page` - Select a page for subsequent operations
+* `mcp__chrome-devtools__wait_for` - Wait for specified text to appear
+
+**Emulation:**
+
+* `mcp__chrome-devtools__emulate` - Emulate CPU throttling, geolocation, network conditions
+* `mcp__chrome-devtools__resize_page` - Resize browser window to specified dimensions
+
+**Performance:**
+
+* `mcp__chrome-devtools__performance_analyze_insight` - Detailed performance analysis
+* `mcp__chrome-devtools__performance_start_trace` - Start performance trace with Core Web Vitals
+* `mcp__chrome-devtools__performance_stop_trace` - Stop performance trace
+
+**Network:**
+
+* `mcp__chrome-devtools__get_network_request` - Get network request details by ID
+* `mcp__chrome-devtools__list_network_requests` - List all network requests since last navigation
+
+**Debugging:**
+
+* `mcp__chrome-devtools__evaluate_script` - Execute JavaScript in page context (use sparingly)
+* `mcp__chrome-devtools__get_console_message` - Get specific console message by ID
+* `mcp__chrome-devtools__list_console_messages` - List all console messages
+* `mcp__chrome-devtools__take_screenshot` - Take screenshot of page or element (critical for verification)
+* `mcp__chrome-devtools__take_snapshot` - Take text snapshot based on a11y tree
+
+**Sample Prompts:**
+
+- "Verify in the browser that your change works as expected."
+- "A few images on localhost:3000 are not loading. What's happening?"
+- "Why does submitting the form fail after entering an email address?"
+- "The page on localhost:3000 looks strange and off. Check what's happening there."
+- "Localhost:3000 is loading slowly. Make it load faster."
 
 Test like a human user with mouse and keyboard. Don't take shortcuts by using JavaScript evaluation.
 Always capture a screenshot after key interactions to verify visual state.
+
+**Note:** Navigate to localhost:3000 (or the port specified in your app) directly - chrome-devtools MCP does not require Docker and can access localhost without any special configuration.
 
 ---
 
