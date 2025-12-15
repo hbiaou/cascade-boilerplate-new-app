@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-12-15
+
+### Added
+
+- **QA Engineer Agent (On-Demand)**: New agent for black-box testing and documentation maintenance
+  - Performs user journey simulation, smoke tests, and exploratory testing
+  - Generates `qa_report.md` for architect consumption
+  - Maintains project documentation (README, guides)
+  - Strictly forbidden from modifying application codebase
+- **README.md**: Comprehensive project documentation
+  - Complete workflow guide for all agents
+  - Prerequisites and installation instructions
+  - Quick start guide and iterative improvement workflow
+  - Known issues and troubleshooting section
+
+### Changed
+
+- **Browser Automation Migration**: Switched from Playwright MCP to chrome-devtools MCP as primary tool
+  - Updated coder agent with 26 chrome-devtools MCP tools across 6 categories
+  - Added sample prompts for common browser automation tasks
+  - Simplified setup: no Docker required for standard usage
+  - Playwright MCP remains available as alternative option
+- **Port Standardization**: Updated default port from localhost:5173 to localhost:3000
+- **Workflow Simplification**: Transitioned from migration-focused to new app creation workflow
+  - Removed AI Studio migration agent references
+  - Removed database migration agent references
+  - Streamlined from 7-agent to 5-agent core workflow (plus on-demand QA)
+- **Documentation Updates**:
+  - AI_WORKFLOW.md: Added QA Engineer, updated workflow sequences
+  - coder.md: Comprehensive chrome-devtools MCP tool reference
+
+### Fixed
+
+- Browser tool syntax: Verified correct `mcp__chrome-devtools__` prefix for all tools
+
 ## [0.3.1] - 2025-12-15
 
 ### Fixed
