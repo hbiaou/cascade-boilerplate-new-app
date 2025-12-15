@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-12-15
+
+### Added
+
+- Enhanced design system enforcement across workflow
+  - Comprehensive design system creation requirements for new applications
+  - Mandatory design system validation in code generation pipeline
+  - Increased test coverage expectations (50-75 tests with 20-30 visual tests)
+  - Design system documentation requirements in architect specifications
+  - Validation rules to prevent generic "AI slop" aesthetics across Cascade workflow
+
+### Changed
+
+- Architect agent: Enhanced MODE 1 with comprehensive design system creation requirements
+- Coder agent: Integrated mandatory design system validation in feature implementation
+- Project initializer agent: Updated test coverage expectations with visual testing focus
+- AI workflow documentation: Comprehensive guide for design system enforcement
+
 ## [0.2.0] - 2025-12-13
 
 ### Added
