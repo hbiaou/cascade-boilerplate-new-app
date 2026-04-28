@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/hbiaou-cascade-boilerplate-new-app-badge.png)](https://mseep.ai/app/hbiaou-cascade-boilerplate-new-app)
+
 # Cascade - Autonomous Coding Boilerplate
 
 ## Overview
